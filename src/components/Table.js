@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
+import Head from './Head'
 
 const item = {
   firstName: 'John',
@@ -62,6 +63,7 @@ class Table extends PureComponent {
       schema,
       data,
     }
+    this.head = {}
   }
 
   onDragEnd = (result) => {
@@ -79,44 +81,62 @@ class Table extends PureComponent {
     })
   }
 
+  reorderColumn = (startIndex, targetIndex) => {
+    const { schema } = this.state
+    this.setState({
+      schema: reorder(schema, startIndex, targetIndex),
+    })
+  }
+
+  onColumnDragStart = (index) => () => {
+    this.dragColumnIndex = index
+  }
+
+  onColumnDragOver = (index) => (e) => {
+    const { schema } = this.state
+    const column = schema[index]
+    if (index === this.dragColumnIndex) {
+      return
+    }
+    const targetRect = this.head[column.key].getBoundingClientRect()
+    const middle = (targetRect.right - targetRect.left) / 2
+    const hoverClientX = e.clientX - targetRect.left
+    if (this.dragColumnIndex < index && hoverClientX < middle) {
+      return
+    }
+
+    if (this.dragColumnIndex > index && hoverClientX > middle) {
+      return
+    }
+
+    const newSchema = reorder(this.state.schema, this.dragColumnIndex, index)
+    this.setState({
+      schema: newSchema,
+    }, () => this.dragColumnIndex = index)
+  }
 
   renderHead = () => {
     const { schema } = this.state
     return (
-      <DragDropContext onDragEnd={this.onDragEnd}>
-        <Droppable droppableId="droppable" direction="horizontal">
-          {(provided, snapshot) => (
-
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className="row"
-
-            >
-              {schema.map((col, colIndex) => (
-                <div key={colIndex} className="column" style={{ width: col.width }}>
-                  <Draggable draggableId={col.key} index={colIndex}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
-                        {col.title}
-                      </div>
-                    )}
-                  </Draggable>
-                </div>
-              ))}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+      <div className="row">
+        {schema.map((col, colIndex) => (
+          <div
+            ref={el => this.head[col.key] = el}
+            onDragStart={this.onColumnDragStart(colIndex)}
+            onDragOver={this.onColumnDragOver(colIndex)}
+            draggable={true}
+            key={colIndex}
+            className="column"
+            style={{ width: col.width }}
+          >
+            {col.title}
+          </div>
+        ))}
+      </div>
     )
   }
 
   onRowDragEnd = (result) => {
-    console.log(result)
     if (!result.destination) {
       return
     }
@@ -152,9 +172,9 @@ class Table extends PureComponent {
                         <div
                           style={{ width: col.width }}
                           key={colIndex}
-                             className="column"
+                          className="column"
                         >
-                          {col.render && typeof col.render === 'function' ? col.render(item[col.key]) :item[col.key]}
+                          {col.render && typeof col.render === 'function' ? col.render(item[col.key]) : item[col.key]}
                         </div>
                       ))}
                     </div>
@@ -182,10 +202,11 @@ class Table extends PureComponent {
   }
 
   render() {
+    const { schema } = this.state
     return (
       <div className="table">
-        {this.renderHead()}
-
+        <Head schema={schema} reorder={this.reorderColumn} />
+        {/*{this.renderHead()}*/}
         {this.renderBody()}
       </div>
     )
