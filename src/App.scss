@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  margin-top: 20px;
 }
 
 .App-logo {
@@ -29,18 +30,5 @@
   }
   to {
     transform: rotate(360deg);
-  }
-}
-
-.table {
-  display: flex;
-  flex-direction: column;
-  .row {
-    display: flex;
-  }
-
-  .column {
-    padding: 8px 16px;
-    border: 1px solid red;
   }
 }

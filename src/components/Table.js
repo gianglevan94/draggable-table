@@ -1,14 +1,20 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
-import Head from './Head'
+import TableBody from './TableBody'
+import TableHead from './TableHead'
 
 const item = {
-  firstName: 'John',
-  lastName: 'Doe',
-  email: 'john@example.com',
-  age: 20,
-  address: 'Viet Nam'
+  index: 'VN-Index',
+  last: 'Sunny Garton',
+  change: '(288) 1417941',
+  percentChange: 'GMC',
+  volume: 'Savana 2500',
+  value: 'Yellow',
+  buyVolume: '$99799.94',
+  sellVolume: '2016-03-23',
+  foreignNet: 5,
+  putThoughVol: 2,
+  putThoughValue: 2,
 }
 
 const data = [...Array(10)].map((it, index) => ({ id: index + 1, ...item }))
@@ -16,34 +22,55 @@ const data = [...Array(10)].map((it, index) => ({ id: index + 1, ...item }))
 const schema = [
   {
     key: 'id',
-    title: '#',
-    width: '5%',
+    title: 'ID',
   },
   {
-    key: 'firstName',
-    title: 'Firstname',
-    width: '15%',
+    key: 'index',
+    title: 'INDEX',
+    render: text => <><i className="icon-graph fs-10" />{text}</>
   },
   {
-    key: 'lastName',
-    title: 'Last Name',
-    width: '15%',
-    render: (text) => <div onClick={() => alert(text)}>{text}</div>
+    key: 'last',
+    title: 'LAST',
+    render: (text, item, index) => (
+      <div className={index % 2 === 0 ? 'text-s-color-5' : 'text-s-color-3'}>{text}</div>
+    ),
   },
   {
-    key: 'email',
-    title: 'Email',
-    width: '15%',
+    key: 'change',
+    title: 'CHANGE',
   },
   {
-    key: 'age',
-    title: 'Age',
-    width: '15%',
+    key: 'percentChange',
+    title: '% CHANGE',
   },
   {
-    key: 'address',
-    title: 'Address',
-    width: '15%',
+    key: 'volume',
+    title: 'VOLUME',
+  },
+  {
+    key: 'value',
+    title: 'VALUE',
+  },
+  {
+    key: 'buyVolume',
+    title: 'FR. BUY VOL',
+  },
+  {
+    key: 'sellVolume',
+    title: 'FR. SELL VOL',
+  },
+  {
+    key: 'foreignNet',
+    title: 'FOREIGN NET',
+  },
+  {
+    key: 'putThoughVol',
+    title: 'PUT THROUGH VOL',
+  },
+  {
+    key: 'putThoughValue',
+    title: 'PUT THROUGH VALUE',
   },
 ]
 
@@ -62,23 +89,9 @@ class Table extends PureComponent {
     this.state = {
       schema,
       data,
+      widths: {},
+      hideColumns: [],
     }
-    this.head = {}
-  }
-
-  onDragEnd = (result) => {
-    if (!result.destination) {
-      return
-    }
-    const schema = reorder(
-      this.state.schema,
-      result.source.index,
-      result.destination.index
-    )
-
-    this.setState({
-      schema,
-    })
   }
 
   reorderColumn = (startIndex, targetIndex) => {
@@ -88,126 +101,89 @@ class Table extends PureComponent {
     })
   }
 
-  onColumnDragStart = (index) => () => {
-    this.dragColumnIndex = index
-  }
-
-  onColumnDragOver = (index) => (e) => {
-    const { schema } = this.state
-    const column = schema[index]
-    if (index === this.dragColumnIndex) {
-      return
-    }
-    const targetRect = this.head[column.key].getBoundingClientRect()
-    const middle = (targetRect.right - targetRect.left) / 2
-    const hoverClientX = e.clientX - targetRect.left
-    if (this.dragColumnIndex < index && hoverClientX < middle) {
-      return
-    }
-
-    if (this.dragColumnIndex > index && hoverClientX > middle) {
-      return
-    }
-
-    const newSchema = reorder(this.state.schema, this.dragColumnIndex, index)
+  reorderRow = (startIndex, targetIndex) => {
+    const { data } = this.state
     this.setState({
-      schema: newSchema,
-    }, () => this.dragColumnIndex = index)
-  }
-
-  renderHead = () => {
-    const { schema } = this.state
-    return (
-      <div className="row">
-        {schema.map((col, colIndex) => (
-          <div
-            ref={el => this.head[col.key] = el}
-            onDragStart={this.onColumnDragStart(colIndex)}
-            onDragOver={this.onColumnDragOver(colIndex)}
-            draggable={true}
-            key={colIndex}
-            className="column"
-            style={{ width: col.width }}
-          >
-            {col.title}
-          </div>
-        ))}
-      </div>
-    )
-  }
-
-  onRowDragEnd = (result) => {
-    if (!result.destination) {
-      return
-    }
-    const data = reorder(
-      this.state.data,
-      result.source.index,
-      result.destination.index
-    )
-
-    this.setState({
-      data,
+      data: reorder(data, startIndex, targetIndex),
     })
   }
 
-  renderBody = () => {
-    const { data, schema } = this.state
-    return (
-      <DragDropContext onDragEnd={this.onRowDragEnd}>
-        <Droppable droppableId="droppableRow">
-          {(provided, snapshot) => (
-            <div ref={provided.innerRef}>
-              {data.map((item, rowIndex) => (
-                <Draggable key={rowIndex} draggableId={item.id} index={rowIndex}>
-                  {(provided, snapshot) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      key={rowIndex}
-                      className="row"
-                    >
-                      {schema.map((col, colIndex) => (
-                        <div
-                          style={{ width: col.width }}
-                          key={colIndex}
-                          className="column"
-                        >
-                          {col.render && typeof col.render === 'function' ? col.render(item[col.key]) : item[col.key]}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
-    )
-    return (
-      <tbody>
-      {data.map((item, rowIndex) => (
-        <tr key={rowIndex}>
-          {schema.map((col, colIndex) => (
-            <td key={colIndex}>
-              {col.render && typeof col.render === 'function' ? col.render(item[col.key], item) : item[col.key]}
-            </td>
-          ))}
-        </tr>
-      ))}
-      </tbody>
-    )
+  setWidth = widths => {
+    this.setState({
+      widths,
+    })
+  }
+
+  hideColumn = (key) => {
+    const { hideColumns } = this.state
+
+    this.setState({
+      hideColumns: hideColumns.concat(key)
+    })
+  }
+
+  showColumn = (key) => {
+    const { hideColumns } = this.state
+
+    this.setState({
+      hideColumns: hideColumns.filter(col => col !== key)
+    })
+  }
+
+  onCheckBoxChange = (e) => {
+    if (e.target.checked) {
+      this.showColumn(e.target.name)
+      return
+    }
+    this.hideColumn(e.target.name)
+  }
+
+  getSchema = () => {
+    const { schema, hideColumns } = this.state
+
+    return schema.filter(col => !hideColumns.includes(col.key))
   }
 
   render() {
-    const { schema } = this.state
+    const { schema, data, widths, hideColumns } = this.state
+    const { columnDraggable, rowDraggable, resizeable } = this.props
     return (
-      <div className="table">
-        <Head schema={schema} reorder={this.reorderColumn} />
-        {/*{this.renderHead()}*/}
-        {this.renderBody()}
+      <div>
+        <table className="scroll-table border-table">
+          <TableHead
+            draggable={columnDraggable}
+            setColumnWidth={this.setWidth}
+            widths={widths}
+            schema={this.getSchema()}
+            reorder={this.reorderColumn}
+            resizeable={resizeable}
+          />
+          <TableBody
+            widths={widths}
+            draggable={rowDraggable}
+            reorder={this.reorderRow}
+            schema={this.getSchema()}
+            data={data}
+          />
+        </table>
+
+        <div className="d-flex mt-3">
+          {schema.map((col) => (
+            <div key={col.key} className="custom-control custom-checkbox mr-3">
+              <input
+                checked={!hideColumns.includes(col.key)}
+                type="checkbox"
+                name={col.key}
+                className="custom-control-input"
+                id={`customCheck1_${col.key}`}
+                onChange={this.onCheckBoxChange}
+              />
+              <label className="custom-control-label" htmlFor={`customCheck1_${col.key}`}>
+                {col.title}
+              </label>
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
@@ -216,11 +192,17 @@ class Table extends PureComponent {
 Table.propTypes = {
   data: PropTypes.array.isRequired,
   schema: PropTypes.array.isRequired,
+  columnDraggable: PropTypes.bool,
+  rowDraggable: PropTypes.bool,
+  resizeable: PropTypes.bool,
 }
 
 Table.defaultProps = {
   data,
   schema,
+  columnDraggable: false,
+  rowDraggable: false,
+  resizeable: false,
 }
 
 export default Table
