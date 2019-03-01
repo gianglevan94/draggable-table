@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
+import Cell from './Cell'
 
 class TableBody extends PureComponent {
   getStyle = (key) => {
@@ -14,21 +15,6 @@ class TableBody extends PureComponent {
     }
   }
 
-  renderColumn = (item, col, colIndex, rowIndex) => {
-    if (col.render && typeof col.render === 'function') {
-      return (
-        <td className={col.className} style={this.getStyle(col.key)} key={colIndex}>
-          {col.render(item[col.key], item, rowIndex)}
-        </td>
-      )
-    }
-
-    return (
-      <td className={col.className} style={this.getStyle(col.key)} key={colIndex}>
-        {item[col.key]}
-      </td>
-    )
-  }
 
   onDragEnd = (result) => {
     const { reorder } = this.props
@@ -36,15 +22,21 @@ class TableBody extends PureComponent {
   }
 
   render() {
-    const { data, schema, draggable } = this.props
+    const { ids, schema, draggable, widths, getDataFromRedux } = this.props
     if (!draggable) {
       return (
         <tbody>
-          {data.map(item =>
-            <tr>
-            {schema.map((col, colIndex) => this.renderColumn(item, col, colIndex))}
-            </tr>
-          )}
+        {ids.map((id, rowIndex) =>
+          <tr>
+            <Cell
+              getDataFromRedux={getDataFromRedux}
+              id={id}
+              key={rowIndex}
+              widths={widths}
+              schema={schema}
+            />
+          </tr>
+        )}
         </tbody>
       )
     }
@@ -53,16 +45,25 @@ class TableBody extends PureComponent {
         <Droppable droppableId="droppableRow">
           {(provided) => (
             <tbody ref={provided.innerRef}>
-            {data.map((item, rowIndex) => (
-              <Draggable key={rowIndex} draggableId={item.id} index={rowIndex}>
+            {ids.map((id, rowIndex) => (
+              <Draggable
+                key={rowIndex}
+                draggableId={id}
+                index={rowIndex}
+              >
                 {(provided) => (
                   <tr
                     ref={provided.innerRef}
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
-                    key={item.id}
                   >
-                    {schema.map((col, colIndex) => this.renderColumn(item, col, colIndex, rowIndex))}
+                    <Cell
+                      getDataFromRedux={getDataFromRedux}
+                      id={id}
+                      key={rowIndex}
+                      widths={widths}
+                      schema={schema}
+                    />
                   </tr>
                 )}
               </Draggable>
@@ -78,16 +79,18 @@ class TableBody extends PureComponent {
 }
 
 TableBody.propTypes = {
-  data: PropTypes.array.isRequired,
+  ids: PropTypes.array.isRequired,
   schema: PropTypes.array.isRequired,
   reorder: PropTypes.func,
   widths: PropTypes.object,
   draggable: PropTypes.bool.isRequired,
+  getDataFromRedux: PropTypes.func,
 }
 
 TableBody.defaultProps = {
   reorder: () => {},
   widths: {},
+  getDataFromRedux: () => {},
 }
 
 export default TableBody

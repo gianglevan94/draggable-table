@@ -1,24 +1,10 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
+import { updateData } from './actions'
 import Table from './components/Table'
 import './App.scss'
 
 import TextBlink from './components/TextBlink'
-
-const item = {
-  index: 'VN-Index',
-  last: 'Sunny Garton',
-  change: '(288) 1417941',
-  percentChange: 'GMC',
-  volume: 'Savana 2500',
-  value: 'Yellow',
-  buyVolume: '$99799.94',
-  sellVolume: '2016-03-23',
-  foreignNet: 5,
-  putThoughVol: 2,
-  putThoughValue: 2,
-}
-
-const data = [...Array(10)].map((it, index) => ({ id: index + 1, ...item }))
 
 const schema = [
   {
@@ -77,37 +63,37 @@ const schema = [
 ]
 
 class App extends Component {
-  state = {
-    data,
+  updateData = (e) => {
+    e.preventDefault()
+    const { updateData } = this.props
+    updateData()
   }
 
-  componentDidMount() {
-    setInterval(this.randomValue, 2000)
-  }
-
-  randomValue = () => {
-    this.setState({
-      data: data.map(item => ({
-        ...item,
-        foreignNet: Math.floor(Math.random() * 100)
-      }))
-    })
+  sort = (key, type) => {
+    console.log(key, type)
   }
 
   render() {
+    const { ids } = this.props
     return (
       <div className="App">
         <Table
-          data={this.state.data}
+          ids={ids}
           schema={schema}
           resizeable={true}
           columnDraggable={true}
           rowDraggable={true}
           hideColumns={['change']}
+          getDataFromRedux={state => state.data}
         />
+
+        <button onClick={this.updateData}>Update data</button>
       </div>
     )
   }
 }
 
-export default App
+const mapStateToProps = ({ ids }) => ({ ids })
+const mapDispatchToProps = { updateData }
+
+export default connect(mapStateToProps, mapDispatchToProps)(App)

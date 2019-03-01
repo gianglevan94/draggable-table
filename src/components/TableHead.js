@@ -59,7 +59,6 @@ class TableHead extends PureComponent {
   }
 
   getStyle = (key) => {
-    const { draggable } = this.props
     const initStyle = {
       position: 'relative',
       cursor: 'default',
@@ -92,7 +91,7 @@ class TableHead extends PureComponent {
     this.clientX = e.clientX
   }
 
-  onStopResize = (e) => {
+  onStopResize = () => {
     this.isResize = false
     this.key = null
   }
@@ -160,6 +159,7 @@ TableHead.propTypes = {
   draggable: PropTypes.bool.isRequired,
   resizeable: PropTypes.bool,
   onSort: PropTypes.func,
+  ids: PropTypes.array,
 }
 
 TableHead.defaultProps = {
@@ -168,6 +168,7 @@ TableHead.defaultProps = {
   widths: {},
   resizeable: false,
   onSort: () => {},
+  ids: [],
 }
 
 export default TableHead

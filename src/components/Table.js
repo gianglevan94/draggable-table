@@ -2,7 +2,6 @@ import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import TableBody from './TableBody'
 import TableHead from './TableHead'
-import orderBy from 'lodash/orderBy'
 
 export const SORT_TYPES = {
   ASC: 'asc',
@@ -20,21 +19,21 @@ const reorder = (list, startIndex, endIndex) => {
 class Table extends PureComponent {
   constructor(props) {
     super(props)
-    const { schema, data, hideColumns } = this.props
+    const { hideColumns, schema, ids } = this.props
     this.state = {
       schema,
-      data,
       hideColumns,
       widths: {},
       sortState: {},
+      ids,
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    const { data, hideColumns } = this.props
-    if (data !== nextProps.data) {
+    const { hideColumns, ids } = this.props
+    if (ids !== nextProps.ids) {
       this.setState({
-        data: nextProps.data,
+        ids: nextProps.ids,
       })
     }
     if (hideColumns !== nextProps.hideColumns) {
@@ -52,9 +51,9 @@ class Table extends PureComponent {
   }
 
   reorderRow = (startIndex, targetIndex) => {
-    const { data } = this.state
+    const { ids } = this.state
     this.setState({
-      data: reorder(data, startIndex, targetIndex),
+      ids: reorder(ids, startIndex, targetIndex)
     })
   }
 
@@ -94,20 +93,20 @@ class Table extends PureComponent {
     return schema.filter(col => !hideColumns.includes(col.key))
   }
 
-  sortData = (key, type) => {
-    const { data } = this.state
-    this.setState({
-      data: orderBy(data, [key], [type])
-    })
-  }
-
   render() {
-    const { schema, data, widths, hideColumns } = this.state
-    const { columnDraggable, rowDraggable, resizeable } = this.props
+    const { widths, hideColumns, ids } = this.state
+    const {
+      columnDraggable,
+      rowDraggable,
+      resizeable,
+      getDataFromRedux,
+      schema
+    } = this.props
     return (
       <div>
         <table className="scroll-table border-table">
           <TableHead
+            ids={ids}
             draggable={columnDraggable}
             setColumnWidth={this.setWidth}
             widths={widths}
@@ -117,11 +116,12 @@ class Table extends PureComponent {
             onSort={this.sortData}
           />
           <TableBody
+            getDataFromRedux={getDataFromRedux}
             widths={widths}
             draggable={rowDraggable}
             reorder={this.reorderRow}
             schema={this.getSchema()}
-            data={data}
+            ids={ids}
           />
         </table>
 
@@ -148,21 +148,25 @@ class Table extends PureComponent {
 }
 
 Table.propTypes = {
-  data: PropTypes.array.isRequired,
-  schema: PropTypes.array.isRequired,
+  ids: PropTypes.array,
+  schema: PropTypes.array,
   columnDraggable: PropTypes.bool,
   rowDraggable: PropTypes.bool,
   resizeable: PropTypes.bool,
   hideColumns: PropTypes.array,
+  getDataFromRedux: PropTypes.func.isRequired,
+  onSort: PropTypes.func,
 }
 
 Table.defaultProps = {
-  data: [],
+  ids: [],
   schema: [],
   hideColumns: [],
   columnDraggable: false,
   rowDraggable: false,
   resizeable: false,
+  onReorderRow: () => {},
+  onSort: () => {},
 }
 
 export default Table
