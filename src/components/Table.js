@@ -20,11 +20,11 @@ const reorder = (list, startIndex, endIndex) => {
 class Table extends PureComponent {
   constructor(props) {
     super(props)
-    const { schema, data, hideColumns } = this.props
+    const { data, hideColumns } = this.props
     this.state = {
-      schema,
       data,
       hideColumns,
+      schema: this.getSchema(hideColumns),
       widths: {},
       sortState: {},
     }
@@ -68,15 +68,17 @@ class Table extends PureComponent {
     const { hideColumns } = this.state
 
     this.setState({
-      hideColumns: hideColumns.concat(key)
+      hideColumns: hideColumns.concat(key),
+      schema: this.getSchema(hideColumns.concat(key)),
     })
   }
 
   showColumn = (key) => {
     const { hideColumns } = this.state
-
+    const newHideColumns = hideColumns.filter(col => col !== key)
     this.setState({
-      hideColumns: hideColumns.filter(col => col !== key)
+      hideColumns: newHideColumns,
+      schema: this.getSchema(newHideColumns),
     })
   }
 
@@ -88,8 +90,8 @@ class Table extends PureComponent {
     this.hideColumn(e.target.name)
   }
 
-  getSchema = () => {
-    const { schema, hideColumns } = this.state
+  getSchema = hideColumns => {
+    const { schema } = this.props
 
     return schema.filter(col => !hideColumns.includes(col.key))
   }
@@ -102,7 +104,7 @@ class Table extends PureComponent {
   }
 
   render() {
-    const { schema, data, widths, hideColumns } = this.state
+    const { data, widths, hideColumns, schema } = this.state
     const { columnDraggable, rowDraggable, resizeable } = this.props
     return (
       <div>
@@ -111,7 +113,7 @@ class Table extends PureComponent {
             draggable={columnDraggable}
             setColumnWidth={this.setWidth}
             widths={widths}
-            schema={this.getSchema()}
+            schema={schema}
             reorder={this.reorderColumn}
             resizeable={resizeable}
             onSort={this.sortData}
@@ -120,13 +122,13 @@ class Table extends PureComponent {
             widths={widths}
             draggable={rowDraggable}
             reorder={this.reorderRow}
-            schema={this.getSchema()}
+            schema={schema}
             data={data}
           />
         </table>
 
         <div className="d-flex mt-3">
-          {schema.map((col) => (
+          {this.props.schema.map((col) => (
             <div key={col.key} className="custom-control custom-checkbox mr-3">
               <input
                 checked={!hideColumns.includes(col.key)}

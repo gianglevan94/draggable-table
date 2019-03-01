@@ -60,7 +60,6 @@ class TableHead extends PureComponent {
   }
 
   getStyle = (key) => {
-    const { draggable } = this.props
     const initStyle = {
       position: 'relative',
       cursor: 'default',
