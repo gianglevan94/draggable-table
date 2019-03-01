@@ -1,21 +1,9 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
-import Cell from './Cell'
+import Row from './Row'
 
 class TableBody extends PureComponent {
-  getStyle = (key) => {
-    const { widths } = this.props
-    if (!widths[key]) {
-      return {}
-    }
-
-    return {
-      width: widths[key]
-    }
-  }
-
-
   onDragEnd = (result) => {
     const { reorder } = this.props
     reorder(result.source.index, result.destination.index)
@@ -29,7 +17,7 @@ class TableBody extends PureComponent {
         <tbody>
         {ids.map((id, rowIndex) =>
           <tr>
-            <Cell
+            <Row
               getDataFromRedux={getDataFromRedux}
               id={id}
               key={rowIndex}
@@ -58,7 +46,7 @@ class TableBody extends PureComponent {
                     {...provided.draggableProps}
                     {...provided.dragHandleProps}
                   >
-                    <Cell
+                    <Row
                       getDataFromRedux={getDataFromRedux}
                       id={id}
                       key={rowIndex}

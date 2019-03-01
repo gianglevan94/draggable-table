@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-class Cell extends React.PureComponent {
+class Row extends React.PureComponent {
   getStyle = (key) => {
     const { widths } = this.props
     if (!widths[key]) {
@@ -34,7 +34,7 @@ class Cell extends React.PureComponent {
   }
 
   render() {
-    console.log('cell render')
+    console.log('row render')
     const { schema, item, ...rest } = this.props
     return (
       <>
@@ -50,4 +50,4 @@ const mapStateToProps = (state, { id, getDataFromRedux }) => {
   }
 }
 
-export default connect(mapStateToProps)(Cell)
+export default connect(mapStateToProps)(Row)
