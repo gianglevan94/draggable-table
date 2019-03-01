@@ -20,21 +20,26 @@ const reorder = (list, startIndex, endIndex) => {
 class Table extends PureComponent {
   constructor(props) {
     super(props)
-    const { schema, data } = this.props
+    const { schema, data, hideColumns } = this.props
     this.state = {
       schema,
       data,
+      hideColumns,
       widths: {},
-      hideColumns: [],
       sortState: {},
     }
   }
 
   componentWillReceiveProps(nextProps) {
-    const { data } = this.props
+    const { data, hideColumns } = this.props
     if (data !== nextProps.data) {
       this.setState({
         data: nextProps.data,
+      })
+    }
+    if (hideColumns !== nextProps.hideColumns) {
+      this.setState({
+        hideColumns: nextProps.hideColumns,
       })
     }
   }
@@ -148,11 +153,13 @@ Table.propTypes = {
   columnDraggable: PropTypes.bool,
   rowDraggable: PropTypes.bool,
   resizeable: PropTypes.bool,
+  hideColumns: PropTypes.array,
 }
 
 Table.defaultProps = {
   data: [],
   schema: [],
+  hideColumns: [],
   columnDraggable: false,
   rowDraggable: false,
   resizeable: false,
