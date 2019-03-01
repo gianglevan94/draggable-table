@@ -1,12 +1,14 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 
+const ANIMATION_TIME = 1000
+
 class TextBlink extends PureComponent {
   componentDidUpdate(prevProps, prevState, snapshot) {
     const { children } = this.props
     if (children !== prevProps.children) {
       this.div.classList.add('blink')
-      this.blinkTimeout = setTimeout(this.removeBlinkClass, 1000)
+      this.blinkTimeout = setTimeout(this.removeBlinkClass, ANIMATION_TIME)
     }
   }
 

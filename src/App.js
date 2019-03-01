@@ -103,6 +103,7 @@ class App extends Component {
           resizeable={true}
           columnDraggable={true}
           rowDraggable={true}
+          hideColumns={['change']}
         />
       </div>
     )

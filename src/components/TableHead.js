@@ -55,8 +55,7 @@ class TableHead extends PureComponent {
     if (this.dragColumnIndex > index && hoverClientX > middle) {
       return
     }
-    reorder(this.dragColumnIndex, index)
-    this.dragColumnIndex = index
+    reorder(this.dragColumnIndex, index, () => this.dragColumnIndex = index)
   }
 
   getStyle = (key) => {
