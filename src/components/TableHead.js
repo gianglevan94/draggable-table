@@ -39,7 +39,7 @@ class TableHead extends PureComponent {
     this.dragColumnIndex = index
   }
 
-  onDragEnter = (index) => (e) => {
+  onDragOver = (index) => (e) => {
     const { reorder, schema } = this.props
     const column = schema[index]
     if (index === this.dragColumnIndex) {
@@ -124,7 +124,7 @@ class TableHead extends PureComponent {
             key={colIndex}
             ref={el => this.columnRefs[col.key] = el}
             onDragStart={this.onDragStart(colIndex)}
-            onDragOver={this.onDragEnter(colIndex)}
+            onDragOver={this.onDragOver(colIndex)}
             draggable={draggable}
             style={this.getStyle(col.key)}
           >
