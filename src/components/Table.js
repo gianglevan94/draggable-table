@@ -16,7 +16,7 @@ const reorder = (list, startIndex, endIndex) => {
   return result
 }
 
-class Table extends PureComponent {
+class Table extends React.Component {
   constructor(props) {
     super(props)
     const { hideColumns, ids } = this.props
@@ -45,7 +45,6 @@ class Table extends PureComponent {
 
   reorderColumn = (startIndex, targetIndex, callback) => {
     const { schema } = this.state
-    console.log(startIndex, targetIndex)
     this.setState({
       schema: reorder(schema, startIndex, targetIndex),
     }, callback)
@@ -91,7 +90,6 @@ class Table extends PureComponent {
   }
 
   getSchema = hideColumns => {
-    console.log(hideColumns)
     const { schema } = this.props
     return schema.filter(col => !hideColumns.includes(col.key))
   }
@@ -103,6 +101,7 @@ class Table extends PureComponent {
       rowDraggable,
       resizeable,
       getDataFromRedux,
+      onSort,
     } = this.props
     return (
       <div>
@@ -115,7 +114,7 @@ class Table extends PureComponent {
             schema={schema}
             reorder={this.reorderColumn}
             resizeable={resizeable}
-            onSort={this.sortData}
+            onSort={onSort}
           />
           <TableBody
             getDataFromRedux={getDataFromRedux}

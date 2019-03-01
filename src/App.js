@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { updateData } from './actions'
+import { sort } from './components/helpers'
 import Table from './components/Table'
 import './App.scss'
 
@@ -70,8 +71,19 @@ class App extends Component {
   }
 
   sort = (key, type) => {
-    console.log(key, type)
+    const { data, ids } = this.props
+    const sortedData = sort({
+      ids,
+      data,
+      valueFromItem: item => item[key],
+      type,
+    })
+
+    console.log(sortedData)
+    // Update state
   }
+
+  getDataFromRedux = state => state.data
 
   render() {
     const { ids } = this.props
@@ -84,7 +96,8 @@ class App extends Component {
           columnDraggable={true}
           rowDraggable={true}
           hideColumns={['change']}
-          getDataFromRedux={state => state.data}
+          onSort={this.sort}
+          getDataFromRedux={this.getDataFromRedux}
         />
 
         <button onClick={this.updateData}>Update data</button>
@@ -93,7 +106,7 @@ class App extends Component {
   }
 }
 
-const mapStateToProps = ({ ids }) => ({ ids })
+const mapStateToProps = ({ ids, data }) => ({ ids, data })
 const mapDispatchToProps = { updateData }
 
 export default connect(mapStateToProps, mapDispatchToProps)(App)

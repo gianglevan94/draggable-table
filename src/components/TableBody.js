@@ -22,6 +22,7 @@ class TableBody extends PureComponent {
   }
 
   render() {
+    console.log('body render')
     const { ids, schema, draggable, widths, getDataFromRedux } = this.props
     if (!draggable) {
       return (
