@@ -1,9 +1,14 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
+import { SORT_TYPES } from './Table'
 
 const MIN_WIDTH = 100
 
 class TableHead extends PureComponent {
+  state = {
+    sortState: {}
+  }
+
   columnRefs = {}
 
   componentDidMount() {
@@ -58,7 +63,7 @@ class TableHead extends PureComponent {
     const { draggable } = this.props
     const initStyle = {
       position: 'relative',
-      cursor: draggable ? 'move' : 'default',
+      cursor: 'default',
     }
     const { widths } = this.props
     if (!widths[key]) {
@@ -93,6 +98,23 @@ class TableHead extends PureComponent {
     this.key = null
   }
 
+  changeSortState = (key) => (e) => {
+    e.preventDefault()
+    const { sortState } = this.state
+    const { onSort } = this.props
+    const sortStateMap = {
+      [undefined]: SORT_TYPES.ASC,
+      [SORT_TYPES.ASC]: SORT_TYPES.DESC,
+      [SORT_TYPES.DESC]: SORT_TYPES.ASC,
+    }
+    this.setState({
+      sortState: {
+        [key]: sortStateMap[sortState[key]],
+      }
+    })
+    onSort(key, sortStateMap[sortState[key]])
+  }
+
   render() {
     const { schema, draggable, resizeable } = this.props
     return (
@@ -100,6 +122,7 @@ class TableHead extends PureComponent {
       <tr>
         {schema.map((col, colIndex) => (
           <th
+            onClick={this.changeSortState(col.key)}
             key={colIndex}
             ref={el => this.columnRefs[col.key] = el}
             onDragStart={this.onDragStart(colIndex)}
@@ -137,6 +160,7 @@ TableHead.propTypes = {
   widths: PropTypes.object,
   draggable: PropTypes.bool.isRequired,
   resizeable: PropTypes.bool,
+  onSort: PropTypes.func,
 }
 
 TableHead.defaultProps = {
@@ -144,6 +168,7 @@ TableHead.defaultProps = {
   setColumnWidth: () => {},
   widths: {},
   resizeable: false,
+  onSort: () => {},
 }
 
 export default TableHead

@@ -2,6 +2,12 @@ import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import TableBody from './TableBody'
 import TableHead from './TableHead'
+import orderBy from 'lodash/orderBy'
+
+export const SORT_TYPES = {
+  ASC: 'asc',
+  DESC: 'desc',
+}
 
 const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list)
@@ -20,10 +26,11 @@ class Table extends PureComponent {
       data,
       widths: {},
       hideColumns: [],
+      sortState: {},
     }
   }
 
-  componentWillReceiveProps(nextProps, nextContext) {
+  componentWillReceiveProps(nextProps) {
     const { data } = this.props
     if (data !== nextProps.data) {
       this.setState({
@@ -82,6 +89,13 @@ class Table extends PureComponent {
     return schema.filter(col => !hideColumns.includes(col.key))
   }
 
+  sortData = (key, type) => {
+    const { data } = this.state
+    this.setState({
+      data: orderBy(data, [key], [type])
+    })
+  }
+
   render() {
     const { schema, data, widths, hideColumns } = this.state
     const { columnDraggable, rowDraggable, resizeable } = this.props
@@ -95,6 +109,7 @@ class Table extends PureComponent {
             schema={this.getSchema()}
             reorder={this.reorderColumn}
             resizeable={resizeable}
+            onSort={this.sortData}
           />
           <TableBody
             widths={widths}
